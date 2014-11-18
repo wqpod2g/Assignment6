@@ -140,7 +140,6 @@ public class RandomForest {
 	
 	public static void main(String[] args){
 		getAllMatrix();
-		//System.out.println(allMatrix.get(0).size());
 		process();
 	}
 	

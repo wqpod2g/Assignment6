@@ -197,6 +197,22 @@ public class Tools {
 		return num;
 	
 	}
+	
+	
+	/**
+	 * @description 判断一个向量是否为0向量
+	 * @return false:不是零向量，true：是零向量
+	 */
+    public static Boolean IsZeroVector(ArrayList<Double> vector){
+    	Boolean result=true;
+    	int size=vector.size()-1;
+    	for(int i=0;i<size;i++){
+    		if(vector.get(i)!=0){
+    			result=false;
+    		}
+    	}
+    	return result;
+    }
 
 		 
 			
