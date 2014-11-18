@@ -20,6 +20,20 @@ public class DecisionTree {
 	
 	private Node root_nood;//决策树根节点
 	
+	private double weight;//树的权重
+	
+	
+	public Node getRootNode(){
+		return this.root_nood;
+	}
+	
+	public void setWeight(double weight){
+		this.weight=weight;
+	}
+	
+	public double getWeight(){
+		return this.weight;
+	}
 	
 	/**
 	 * @description决策树构造函树
@@ -209,5 +223,5 @@ public class DecisionTree {
 	
 	
 	
-
+	
 }
