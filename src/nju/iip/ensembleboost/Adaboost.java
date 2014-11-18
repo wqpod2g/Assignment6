@@ -158,7 +158,7 @@ public class Adaboost {
 			ArrayList<ArrayList<Double>>testSample=new ArrayList<ArrayList<Double>>();
 			ArrayList<ArrayList<Double>>trainSample=new ArrayList<ArrayList<Double>>();
 			Tools.divide(i,allMatrix,testSample,trainSample);
-			initial_weight_list(trainSample);
+			initial_weight_list(trainSample);//根据当前训练样本初始化权重list
 			ArrayList<DecisionTree>all_trees=getAllTress(trainSample);
 			double count=0.0;
 			int classify_flag=allMatrix.get(0).size()-1;
@@ -169,7 +169,7 @@ public class Adaboost {
 					count++;
 				}
 			}
-			attribte_list.clear();
+			weight_list.clear();
 			System.out.println("第"+(i+1)+"折命中率为:"+count/100);
 			result_list.add(count/100);
 			
