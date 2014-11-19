@@ -47,7 +47,7 @@ public class Adaboost {
 	 * @description 创建属性列表
 	 * @return
 	 */
-	public static ArrayList<Integer>getAttribte_list (){
+	public static ArrayList<Integer>getAttribte_list(){
 		for(int i=0;i<allMatrix.get(0).size()-1;i++){
 			attribte_list.add(i);
 		}
@@ -90,13 +90,13 @@ public class Adaboost {
 	 * @param sample_data
 	 * @return
 	 */
-	public static DecisionTree getDecisionTree(ArrayList<ArrayList<Double>>sample_data){
+	public static DecisionTree getDecisionTree(ArrayList<ArrayList<Double>>sample_data,ArrayList<ArrayList<Double>>train_data){
 		DecisionTree DT=new DecisionTree(sample_data,attribte_list);
 		Node N=DT.getDecisionTree();
-		double error=getError(N);//计算该树的误差率
+		double error=getError(N,train_data);//计算该树的误差率
 		double w=Math.log((1-error)/error);
 		DT.setWeight(w);
-		updataWeightList(error,N);
+		updataWeightList(error,N,train_data);
 		return DT;
 	}
 	
@@ -106,8 +106,27 @@ public class Adaboost {
 	 * @param error
 	 * @param N
 	 */
-	public static void updataWeightList(double error,Node N){
+	public static void updataWeightList(double error,Node N,ArrayList<ArrayList<Double>>train_data){
+		double w=error/(1-error);
+		int classify_flag=allMatrix.get(0).size()-1;
+		int size=train_data.size();
+		double old_sum=Tools.getSum(weight_list);
+		for(int i=0;i<size;i++){
+			ArrayList<Double> vector=train_data.get(i);
+			double a=Tools.getResult(vector, N);
+			double b=vector.get(classify_flag);
+			if(a==b){
+				double temp=weight_list.get(i);
+				weight_list.set(i, temp*w);
+			}
+		}
 		
+		double new_sum=Tools.getSum(weight_list);
+		double rate=old_sum/new_sum;
+		for(int i=0;i<size;i++){
+			double temp=weight_list.get(i);
+			weight_list.set(i, temp*rate);
+		}
 	}
 	
 	
@@ -116,9 +135,22 @@ public class Adaboost {
 	 * @param N
 	 * @return
 	 */
-	public static double getError(Node N){
+	public static double getError(Node N,ArrayList<ArrayList<Double>>train_data){
 		double error=0.0;
-		ArrayList<ArrayList<Double>>sample_data=N.getDocList();
+		int classify_flag=allMatrix.get(0).size()-1;
+		int size=train_data.size();
+		for(int i=0;i<size;i++){
+			ArrayList<Double> vector=train_data.get(i);
+			int result=0;
+			double a=Tools.getResult(vector, N);
+			double b=vector.get(classify_flag);
+			if(a!=b){
+				result=1;
+			}
+			
+			error=error+weight_list.get(i)*result;
+			
+		}
 		return error;
 	}
 	
@@ -128,11 +160,11 @@ public class Adaboost {
 	 * @param sample_data
 	 * @return
 	 */
-	public static ArrayList<DecisionTree>getAllTress(ArrayList<ArrayList<Double>>trainSample){
+	public static ArrayList<DecisionTree>getAllTress(ArrayList<ArrayList<Double>>train_data){
 		ArrayList<DecisionTree>all_trees=new ArrayList<DecisionTree>();
 		for(int i=0;i<Iteration_times;i++){
-			ArrayList<ArrayList<Double>>sample_data=getSampleData(trainSample);
-			DecisionTree DT=getDecisionTree(sample_data);
+			ArrayList<ArrayList<Double>>sample_data=getSampleData(train_data);
+			DecisionTree DT=getDecisionTree(sample_data,train_data);
 			all_trees.add(DT);
 		}
 		return all_trees;
@@ -148,6 +180,19 @@ public class Adaboost {
 	 */
 	public static Double getPredictClassify(ArrayList<Double>vector,ArrayList<DecisionTree>all_trees){
 		double result=0.0;
+		HashMap<Double,Double>map=new HashMap<Double,Double>();
+		for(DecisionTree tree:all_trees){
+			Node root_node=tree.getRootNode();
+			double w=tree.getWeight();
+			double predict_result=Tools.getResult(vector, root_node);
+			if(!map.containsKey(predict_result)){
+				map.put(predict_result,w);
+			}
+			else{
+				map.put(predict_result, map.get(predict_result)+w);
+			}
+		}
+		result=Tools.sortMapDouble(map);
 		return result;
 	}
 	
@@ -155,14 +200,14 @@ public class Adaboost {
 	public static void process(){
 		ArrayList<Double>result_list=new ArrayList<Double>();
 		for(int i=0;i<10;i++){
-			ArrayList<ArrayList<Double>>testSample=new ArrayList<ArrayList<Double>>();
-			ArrayList<ArrayList<Double>>trainSample=new ArrayList<ArrayList<Double>>();
-			Tools.divide(i,allMatrix,testSample,trainSample);
-			initial_weight_list(trainSample);//根据当前训练样本初始化权重list
-			ArrayList<DecisionTree>all_trees=getAllTress(trainSample);
+			ArrayList<ArrayList<Double>>test_data=new ArrayList<ArrayList<Double>>();
+			ArrayList<ArrayList<Double>>train_data=new ArrayList<ArrayList<Double>>();
+			Tools.divide(i,allMatrix,test_data,train_data);
+			initial_weight_list(train_data);//根据当前训练样本初始化权重list
+			ArrayList<DecisionTree>all_trees=getAllTress(train_data);
 			double count=0.0;
 			int classify_flag=allMatrix.get(0).size()-1;
-			for(ArrayList<Double>vector:testSample){
+			for(ArrayList<Double>vector:test_data){
 				double a=getPredictClassify(vector,all_trees);
 				double b=vector.get(classify_flag);
 				if(a==b){
@@ -184,7 +229,8 @@ public class Adaboost {
 	
 	public static void main(String[] arg){
 		getAllMatrix();
-		initial_weight_list(allMatrix);
+		getAttribte_list();
+		process();
 	
 	}
 

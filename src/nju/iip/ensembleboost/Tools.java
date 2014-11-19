@@ -98,6 +98,26 @@ public class Tools {
 	}
 	
 	
+	/**
+	 * @description map按升序排序并输出value最大的值对应的key
+	 * @param map
+	 * @return
+	 */
+	public static Double sortMapDouble(HashMap<Double,Double> map){
+		List<Map.Entry<Double,Double>> list = new ArrayList<Map.Entry<Double,Double>>(map.entrySet());
+	    Collections.sort(list,new Comparator<Map.Entry<Double,Double>>() { //升序排序
+	    	public int compare(Entry<Double, Double> o1,Entry<Double, Double> o2) {
+	                return o1.getValue().compareTo(o2.getValue());
+	            }
+	        });
+	    
+	    int size=list.size();
+	    Map.Entry<Double,Double> mapping=list.get(size-1);
+	    Double result=mapping.getKey();
+		return result;
+	}
+	
+	
 	 /**
      * @decription 计算平均值
      * @param list
@@ -216,7 +236,14 @@ public class Tools {
 
 		 
 			
-			
+	public static double getSum(ArrayList<Double>list){
+		int size=list.size();
+		double sum=0.0;
+		for(int i=0;i<size;i++){
+			sum=sum+list.get(i);
+		}
+		return sum;
+	}
 		
 			
 
