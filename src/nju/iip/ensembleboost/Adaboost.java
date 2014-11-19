@@ -230,7 +230,10 @@ public class Adaboost {
 	public static void main(String[] arg){
 		getAllMatrix();
 		getAttribte_list();
+		long start=System.currentTimeMillis();
 		process();
+		long end=System.currentTimeMillis();
+		System.out.printf("运行时间："+(end-start)/1000+"s");
 	
 	}
 

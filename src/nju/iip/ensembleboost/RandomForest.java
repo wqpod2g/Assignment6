@@ -140,7 +140,10 @@ public class RandomForest {
 	
 	public static void main(String[] args){
 		getAllMatrix();
+		long start=System.currentTimeMillis();
 		process();
+		long end=System.currentTimeMillis();
+		System.out.printf("运行时间："+(end-start)/1000+"s");
 	}
 	
 
