@@ -242,6 +242,7 @@ public class Tools {
 		for(int i=0;i<size;i++){
 			sum=sum+list.get(i);
 		}
+	
 		return sum;
 	}
 		
