@@ -6,41 +6,35 @@ import java.util.Collections;
 
 
 public class DecisinTreeRegression {
-	/**
-	 * 测试数据路径
-	 */
-	private static String filePath="Benchmark Dataset/meta.data";
-	
-	private static ArrayList<Integer>attribte_list=new ArrayList<Integer>();//属性集合
-	
-	/**
-	 * 整个样本的特征矩阵集合
-	 */
-	private static ArrayList<ArrayList<Double>>allMatrix=new ArrayList<ArrayList<Double>>();
-	
-	private static int attribte_list_size=0;//属性个数
 	
 	
-	/**
-	 * @获取整个样本的特征矩阵集合
-	 * @return
-	 * @throws IOException
-	 */
-	public static ArrayList<ArrayList<Double>>getAllMatrix(){
-		try {
-			allMatrix=Tools.readFile(filePath);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		attribte_list_size=allMatrix.get(0).size()-1;//计算属性个数
-		return allMatrix;
+	private  ArrayList<Integer>attribte_list;//属性集合
+	
+	private  Node root_node;//根节点
+	
+	private  int attribte_list_size;//属性个数
+	
+	private  ArrayList<ArrayList<Double>>sample_data;//训练样本
+	
+	public  ArrayList<ArrayList<Double>> get_sample_data(){
+		return this.sample_data;
+	}
+	
+	public Node get_root_node(){
+		return this.root_node;
+	}
+	
+	public DecisinTreeRegression(ArrayList<ArrayList<Double>>sample_data){
+		this.sample_data=sample_data;
 	}
 	
 	/**
 	 * @description 创建属性列表
 	 * @return
 	 */
-	public static ArrayList<Integer>getAttribte_list(){
+	public  ArrayList<Integer>getAttribte_list(){
+		attribte_list=new ArrayList<Integer>();
+		attribte_list_size=sample_data.get(0).size()-1;
 		for(int i=0;i<attribte_list_size;i++){
 			attribte_list.add(i);
 		}
@@ -52,7 +46,7 @@ public class DecisinTreeRegression {
 	 * @return rootNode
 	 * @throws IOException 
 	 */
-	public static Node getRootNode(ArrayList<ArrayList<Double>>matrix){
+	public  Node IniRootNode(ArrayList<ArrayList<Double>>matrix){
 		Node rootNode=new Node(matrix);
 		return rootNode;
 	}
@@ -62,7 +56,7 @@ public class DecisinTreeRegression {
 	 * @param D(元组集合)
 	 * @return squared_residuals
 	 */
-	public static Double getSquaredResiduals(ArrayList<ArrayList<Double>>D){
+	public  Double getSquaredResiduals(ArrayList<ArrayList<Double>>D){
 		double squared_residuals=0.0;
 		double mean=0.0;
 		double sum=0.0;
@@ -88,7 +82,7 @@ public class DecisinTreeRegression {
 	 * @param rightDocList
 	 * @return ArrayList<Double>{squared_residuals,split_point}
 	 */
-    public static ArrayList<Double> get_attribute_squared_residuals(int n,ArrayList<ArrayList<Double>>D,ArrayList<ArrayList<Double>>lefeDocList,ArrayList<ArrayList<Double>>rightDocList){
+    public  ArrayList<Double> get_attribute_squared_residuals(int n,ArrayList<ArrayList<Double>>D,ArrayList<ArrayList<Double>>lefeDocList,ArrayList<ArrayList<Double>>rightDocList){
     	double split_point=0.0;
 		double squared_residuals=Double.POSITIVE_INFINITY;
 		ArrayList<Double> divide_result = new ArrayList<Double>();
@@ -127,13 +121,15 @@ public class DecisinTreeRegression {
 		return divide_result;
 	}
 	
+    
+    
 	/**
 	 * @description 计算最好的分裂属性
 	 * @param N
 	 * @param attribte_list
 	 * @return 最好的分裂属性
 	 */
-	public static int Attribute_selection_method(Node N,Node leftChild,Node rightChild){
+	public  int Attribute_selection_method(Node N,Node leftChild,Node rightChild){
 		int attribute = 0;
 		double split_point = 0.0;
 		double squared_residuals=Double.POSITIVE_INFINITY;
@@ -159,11 +155,32 @@ public class DecisinTreeRegression {
 	
 	
 	/**
+	 * @description 计算叶节点的gamma值
+	 * @param N
+	 * @return predict_value
+	 */
+	public  double getGamma(Node N){
+		double sum1=0.0;
+		double sum2=0.0;
+		ArrayList<ArrayList<Double>>doc_list=N.getDocList();
+		int doc_list_size=doc_list.size();
+		for(int i=0;i<doc_list_size;i++){
+			double Yik=doc_list.get(i).get(attribte_list_size);
+			sum1=sum1+Yik;
+			sum2=sum2+Math.abs(Yik)*(1-Math.abs(Yik));
+		}
+		double Gamma=(9.0/10)*(sum1/sum2);
+	
+		return Gamma;
+	}
+	
+	
+	/**
 	 * @description 计算一个节点所有元组y的均值
 	 * @param N
 	 * @return predict_value
 	 */
-	public static double getPredictValue(Node N){
+	public  double getPredictValue(Node N){
 		double predict_value=0.0;
 		double sum=0.0;
 		ArrayList<ArrayList<Double>>doc_list=N.getDocList();
@@ -179,12 +196,12 @@ public class DecisinTreeRegression {
 	 * @description 创建二叉树
 	 * @param N
 	 */
-	public static void getDecisionTree(Node N){
+	public  void createDecisionTree(Node N){
 		if(N!=null){
-			if(N.getDocList().size()<=30){
+			if(N.getDocList().size()<=20){
 				N.setLeftChild(null);
 				N.setRightChild(null);
-			    N.set_predict_value(getPredictValue(N));
+			    N.set_gamma(getGamma(N));//给叶子节点赋上gamma值
 			}
 			else{
 				Node left=new Node();
@@ -193,14 +210,13 @@ public class DecisinTreeRegression {
 				if(left.getDocList().size()==0||right.getDocList().size()==0){
 					N.setLeftChild(null);
 					N.setRightChild(null);
-					N.set_predict_value(getPredictValue(N));
+					N.set_gamma(getGamma(N));//给叶子节点赋上gamma值
 				}
 				else{
 					N.setLeftChild(left);
 					N.setRightChild(right);
-					getDecisionTree(left);
-					getDecisionTree(right);
-					
+					createDecisionTree(left);
+					createDecisionTree(right);
 				}
 			}
 		}
@@ -212,10 +228,10 @@ public class DecisinTreeRegression {
 	 * @param vector
 	 * @return
 	 */
-	public static Double getResult(ArrayList<Double>vector,Node N){
+	public  Double getResult(ArrayList<Double>vector,Node N){
 		
 		if(N.getLeftChild()==null&&N.getRightChild()==null){
-			return N.get_predict_value();
+			return N.get_gamma();
 		}
 		
 		else{
@@ -229,39 +245,20 @@ public class DecisinTreeRegression {
 		}
 	}
 	
-	public static void process(){
-		ArrayList<Double>resultList=new ArrayList<Double>();
-		for(int i=0;i<10;i++){
-			double sum=0.0;
-			ArrayList<ArrayList<Double>>testSample=new ArrayList<ArrayList<Double>>();
-			ArrayList<ArrayList<Double>>trainSample=new ArrayList<ArrayList<Double>>();
-			Tools.divide2(i, allMatrix, testSample, trainSample);
-			Node N=getRootNode(trainSample);
-			getDecisionTree(N);
-			//System.out.println("树的高度为:"+Tools.getTreeHeight(N));
-			for(int j=0;j<testSample.size();j++){
-				Double c1=testSample.get(j).get(attribte_list_size);
-				Double c2=getResult(testSample.get(j),N);
-				sum=sum+(c1-c2)*(c1-c2);
-			}
-			double RMSE=Math.sqrt(sum/testSample.size());
-			System.out.println("第"+(i+1)+"折RMSE为:"+RMSE);
-			resultList.add(RMSE);
-		}
-		System.out.println("十折RMSE均值为:"+Tools.getMean(resultList));
-	}
 	
-	
-	
-	public static void main(String[] args){
-		System.out.println("测试数据集为:"+filePath);
-		getAllMatrix();
+	/**
+	 * @description 得到一颗树并返回根节点
+	 * @return root_node
+	 */
+	public Node getDecisionTree(){
 		getAttribte_list();
-		long startTime=System.currentTimeMillis();   //获取开始时间
-		process();
-		long endTime=System.currentTimeMillis(); //获取结束时间   
-		System.out.println("运行时间： "+(endTime-startTime)/1000.0+"s");
+		this.root_node=IniRootNode(this.sample_data);
+		createDecisionTree(this.root_node);
+		return this.root_node;
 	}
+	
+	
+	
 	
 
 }

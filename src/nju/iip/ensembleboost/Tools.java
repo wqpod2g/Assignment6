@@ -245,6 +245,16 @@ public class Tools {
 	
 		return sum;
 	}
+	
+	
+	public static double getSumExp(ArrayList<Double>vector){
+		double sum=0.0;
+		int vector_size=vector.size();
+		for(int i=0;i<vector_size;i++){
+			sum=sum+Math.exp(vector.get(i));
+		}
+		return sum;
+	}
 		
 			
 

@@ -224,9 +224,6 @@ public class Adaboost {
 		
 	}
 	
-	
-	
-	
 	public static void main(String[] arg){
 		getAllMatrix();
 		getAttribte_list();

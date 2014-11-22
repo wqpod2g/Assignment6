@@ -22,11 +22,21 @@ public class Node {
 	
 	private double predict_value;
 	
+	private double gamma;//叶节点Gamma值
+	
 	private Node leftChild;//左子树
 	
 	private Node rightChild;//右子树
 	
 	private HashMap<Double,Node>child_nodes;//子节点集合<属性值，对应分支节点>
+	
+	public void set_gamma(double gamma){
+		this.gamma=gamma;
+	}
+	
+	public double get_gamma(){
+		return this.gamma;
+	}
 	
 	public void set_predict_value(double predict_value){
 		this.predict_value=predict_value;
