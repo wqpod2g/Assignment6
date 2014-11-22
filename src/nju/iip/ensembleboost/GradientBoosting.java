@@ -189,7 +189,10 @@ public class GradientBoosting {
 	
 	public static void main(String[] arg){
 		getAllMatrix();
+		long start=System.currentTimeMillis();
 		process();
+		long end=System.currentTimeMillis();
+		System.out.println("运行时间为:"+(end-start)/1000+"s");
 	}
 
 }
